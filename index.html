@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>نظام متابعة الغياب اليومي- مدرسة محمد بن سليمان الغافري </title>
+<style>
+:root{ --brand:#115e59; --brand2:#0b8a6a; --ink:#0b1220; --muted:#5b6577; --stroke:#e6e9ef; --radius:16px; --bar:80px; --font-size:18px; --touch-target:44px;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6;background:#0e1615;color:var(--ink);font-size:var(--font-size);-webkit-tap-highlight-color:transparent}
+.container{max-width:100%;margin:0 auto;padding:12px 10px calc(var(--bar) + env(safe-area-inset-bottom) + 10px)}
+.hero{border-radius:18px;color:#fff;padding:14px;background:linear-gradient(135deg,rgba(17,94,89,.95),rgba(11,138,106,.95));box-shadow:0 12px 30px rgba(0,0,0,.15);margin-bottom:12px}
+.hero-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.badge{background:rgba(15,23,42,.9);color:#fff;border-radius:20px;padding:8px 12px;font-weight:700;font-size:14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.card{background:#fff;border:1px solid var(--stroke);border-radius:var(--radius);padding:12px;margin-bottom:10px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.grid3{display:grid;gap:8px;margin-bottom:8px;grid-template-columns:1fr 1fr 1fr}
+@media (max-width:768px){.grid3{grid-template-columns:1fr}:root{--font-size:16px}}
+.select,.btn{padding:14px;border:2px solid var(--stroke);border-radius:14px;background:#fff;font:inherit;font-size:var(--font-size);min-height:var(--touch-target);width:100%}
+.btn{border:none;font-weight:700;cursor:pointer;text-align:center;transition:all .2s ease}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.primary{color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.secondary{background:#f8fafc;color:var(--ink)}
+.danger{color:#fff;background:#dc2626}
+.sticky{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--stroke);padding:10px;display:flex;gap:8px;z-index:1000;box-shadow:0 -8px 20px rgba(0,0,0,.1);flex-wrap:wrap;justify-content:space-between}
+.actions-group{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.actions-group .btn{flex:1;min-width:140px}
+.name{font-weight:700;font-size:var(--font-size);flex:1}
+.meta{color:#64748b;font-size:14px}
+.toast{position:fixed;bottom:calc(var(--bar) + 80px);left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:16px 20px;border-radius:12px;display:none;z-index:1001;font-size:16px;max-width:90%;text-align:center;animation:toastSlide .3s ease-out;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+@keyframes toastSlide{from{transform:translateX(-50%) translateY(100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.success-toast{background:linear-gradient(135deg,#10b981,#059669);animation:successToast .5s ease-out;font-weight:bold}
+@keyframes successToast{0%{transform:translateX(-50%) scale(.8);opacity:0}50%{transform:translateX(-50%) scale(1.05)}100%{transform:translateX(-50%) scale(1);opacity:1}}
+.list{max-height:50vh;overflow-y:auto;margin-top:8px;border:1px solid var(--stroke);border-radius:12px}
+.item{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #f1f5f9}
+.item:last-child{border-bottom:none}
+.item .tag{font-size:12px;border-radius:20px;padding:4px 8px;border:1px solid var(--stroke);color:#475569;white-space:nowrap}
+input[type="checkbox"]{transform:scale(1.3);margin:0;accent-color:var(--brand)}
+.status-list{display:flex;flex-wrap:wrap;gap:6px}
+.pill{padding:8px 12px;border-radius:20px;border:2px solid var(--stroke);background:#fff;cursor:pointer;font-size:14px;transition:all .3s ease}
+.pill.taken{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent;animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+.small{font-size:14px;color:#64748b;margin-top:6px}
+.loading{opacity:.7;pointer-events:none}
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;justify-content:center;align-items:center;z-index:2000;display:none}
+.loading-spinner{background:white;padding:30px;border-radius:16px;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,.3);min-width:200px}
+.spinner{border:4px solid #f3f3f3;border-top:4px solid var(--brand);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;margin:0 auto 15px}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px 20px;color:#64748b;font-size:16px}
+.empty-state.success{background:#f0fdf4;border:2px solid #bbf7d0;border-radius:12px;color:#15803d}
+
+/* بطاقة المقارنة مع مؤشرات دائرية */
+.compare{background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:12px;margin-bottom:10px}
+.compare-title{display:flex;align-items:center;gap:8px;font-weight:800;color:#9a3412}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px}
+@media (max-width:768px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:#fff;border:1px solid #fee2cc;border-radius:14px;padding:12px}
+.kpi{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-weight:700}
+.kpi .label{color:#6b7280;font-weight:600}
+.badge.green{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.badge.red{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.badge.gray{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb}
+.circle{--p:0;--c:#10b981;width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%), #e5e7eb 0);display:grid;place-items:center;font-weight:900;color:#111827}
+.circle small{display:block;font-weight:600;color:#6b7280}
+.circle-wrap{display:flex;align-items:center;gap:10px}
+.circle-abs{--c:#ef4444}
+.kpi-row{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+.kpi-row .badge{min-width:90px;justify-content:center}
+
+/* نافذة الرمز السري */
+.password-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:3000}
+.password-content{background:white;padding:30px;border-radius:20px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3);min-width:300px;max-width:90%}
+.password-input{width:100%;padding:15px;border:2px solid #e5e7eb;border-radius:12px;font-size:18px;text-align:center;margin-bottom:15px;font-family:monospace;letter-spacing:2px}
+.password-buttons{display:flex;gap:10px}
+.password-buttons button{flex:1;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer}
+.password-confirm{background:#dc2626;color:white}
+.password-cancel{background:#6b7280;color:white}
+.grade-actions{display:flex;gap:8px;margin-top:10px}
+.grade-actions .btn{flex:1}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- شريط التحميل -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <div>جاري تحميل البيانات...</div>
+    </div>
+  </div>
+
+  <!-- نافذة الرمز السري -->
+  <div id="passwordModal" class="password-modal">
+    <div class="password-content">
+      <h3>🔒 تفريغ الوسوم</h3>
+      <p>أدخل الرمز السري للمتابعة:</p>
+      <input type="password" id="passwordInput" class="password-input" placeholder="أدخل الرمز" maxlength="8" autocomplete="one-time-code">
+      <div class="password-buttons">
+        <button class="password-cancel" onclick="closePasswordModal()">إلغاء</button>
+        <button class="password-confirm" onclick="confirmClearMarks()">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div style="flex:1;min-width:200px">
+        <div style="font-weight:700;font-size:20px;margin-bottom:6px">رصد الغياب مدرسة أبو الدرداء</div>
+        <div style="opacity:.9;font-size:14px">اختر الصف من “متابعة الصفوف”، ثم حدّد الغائبين واحفظ</div>
+      </div>
+      <div style="text-align:left">
+        <span class="badge" id="statsBadge">جاري التحميل...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- مقارنة الإحصاءات -->
+  <div id="comparisonCard" class="compare" style="display:none">
+    <div class="compare-title">📊 مقارنة إحصاءات الغياب والحضور</div>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="kpi"><span class="label">الحصة الأولى</span><span id="kpi-mor-abs" class="badge red">0 غائب</span></div>
+        <div class="circle-wrap">
+          <div class="circle circle-abs" id="circle-mor-abs"><div><div id="circle-mor-abs-txt">0%</div><small>غياب</small></div></div>
+          <div class="circle" id="circle-mor-pres"><div><div id="circle-mor-pres-txt">0%</div><small>حضور</small></div></div>
+        </div>
+        <div class="kpi-row">
+          <span class="badge green" id="kpi-mor-pres">0 حاضر</span>
+          <span class="badge gray"  id="kpi-mor-total">0 إجمالي</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="kpi"><span class="label">الحالة الطارئة</span><span id="kpi-em-abs" class="badge red">0 غائب</span></div>
+        <div class="circle-wrap">
+          <div class="circle circle-abs" id="circle-em-abs"><div><div id="circle-em-abs-txt">0%</div><small>غياب</small></div></div>
+          <div class="circle" id="circle-em-pres"><div><div id="circle-em-pres-txt">0%</div><small>حضور</small></div></div>
+        </div>
+        <div class="kpi-row">
+          <span class="badge green" id="kpi-em-pres">0 حاضر</span>
+          <span class="badge gray"  id="kpi-em-total">0 إجمالي</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="kpi"><span class="label">الفرق في الغياب</span><span id="kpi-diff-abs" class="badge gray">0</span></div>
+        <div class="kpi"><span class="label">فرق نسبة الغياب</span><span id="kpi-diff-rate" class="badge gray">0%</span></div>
+        <div class="kpi"><span class="label">فرق نسبة الحضور</span><span id="kpi-diff-presRate" class="badge gray">0%</span></div>
+        <div class="kpi"><span class="label">الحالة</span><span id="differenceStatus" class="badge gray">متماثل</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- متابعة الصفوف -->
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:6px;font-size:16px">متابعة الصفوف</div>
+    <div id="statusList" class="status-list"></div>
+    <div class="small">اللون الأخضر يعني تم تسجيل الغياب للصف</div>
+  </div>
+
+  <!-- منطقة العمل -->
+  <div class="card">
+    <div class="grid3">
+      <select id="mode" class="select">
+        <option value="الحصة الأولى">الحصة الأولى</option>
+        <option value="حالة طارئة">حالة طارئة</option>
+      </select>
+      <button class="btn secondary" id="showAbsentsBtn" type="button" style="width:100%">👀 عرض الغائبين</button>
+      <button class="btn secondary" id="exportPdfBtn" type="button" style="width:100%">📄 تنزيل الغائبين PDF</button>
+    </div>
+
+    <div id="gradeActions" class="grade-actions" style="display:none">
+      <button class="btn primary" id="saveBulkBtn" type="button">💾 حفظ الغياب المحدد</button>
+    </div>
+
+    <div id="list" class="list" style="display:none"></div>
+    <div id="empty" class="empty-state">اختر الصف لتحميل الأسماء...</div>
+
+    <div id="absentsBox" class="card" style="margin-top:12px;display:none">
+      <div style="font-weight:700">الغائبون (<span id="absCount">0</span>)</div>
+      <div id="absContent" style="margin-top:6px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- الشريط السفلي -->
+<div class="sticky">
+  <div class="actions-group">
+    <button class="btn danger" id="clearMarksBtn" type="button">🗑️ تفريغ الوسوم</button>
+    <button class="btn secondary" id="showAbsentsBtnFooter" type="button">👀 عرض الغائبين</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ========= إعداد API =========
+const API_URL = 'https://script.google.com/macros/s/AKfycbyIAE_ensAMQ7LbY4N5AdCZVI-1CK-RY82HAk8ys-zbObRriN9sx-hWTpWS478xN2rr6Q/exec';
+
+// استدعاء API: 3 محاولات + Backoff + مهلة 20s + كشف الردود غير-JSON
+async function apiCall(action, payload = {}) {
+  const attempt = async () => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20000); // 20 ثانية
+    try {
+      const body = new URLSearchParams({ action, data: JSON.stringify(payload) });
+      const res = await fetch(API_URL + `?_ts=${Date.now()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body,
+        cache: 'no-store',
+        signal: ctrl.signal,
+        redirect: 'follow',
+        credentials: 'omit',
+        mode: 'cors'
+      });
+      const text = await res.text();
+      clearTimeout(t);
+
+      if (!res.ok) return { ok:false, error:`HTTP ${res.status}: ${text.slice(0,200)}` };
+      try { return JSON.parse(text); }
+      catch { 
+        if (/<!doctype html>|<html/i.test(text)) {
+          return { ok:false, error:'Non-JSON (login page) — تأكد من صلاحيات النشر Anyone.' };
+        }
+        return { ok:false, error:'Non-JSON response: ' + text.slice(0,200) }; 
+      }
+    } catch (err) {
+      clearTimeout(t);
+      return { ok:false, error:'Network/Timeout: ' + String(err) };
+    }
+  };
+
+  let resp = await attempt();
+  if (resp && resp.ok !== false && !resp.error) return resp;
+  await new Promise(r=>setTimeout(r,300));
+  resp = await attempt();
+  if (resp && resp.ok !== false && !resp.error) return resp;
+  await new Promise(r=>setTimeout(r,900));
+  resp = await attempt();
+  return resp;
+}
+
+// ========= أدوات واجهة =========
+const qs = s => document.querySelector(s);
+let CURRENT_LIST = [];
+let SELECTED_ROWS = new Set();
+let CURRENT_GRADE = '';
+let BUSY = false;
+
+function playSuccessSound(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(800,c.currentTime);o.frequency.setValueAtTime(1000,c.currentTime+.1);o.frequency.setValueAtTime(1200,c.currentTime+.2);g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.01,c.currentTime+.3);o.start(c.currentTime);o.stop(c.currentTime+.3);}catch(e){}}
+function createConfetti(){try{const colors=['#ffd700','#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#feca57'];for(let i=0;i<20;i++){const d=document.createElement('div');d.className='confetti';d.style.left=Math.random()*100+'vw';d.style.background=colors[Math.floor(Math.random()*colors.length)];d.style.animationDelay=Math.random()*1+'s';d.style.width='8px';d.style.height='8px';document.body.appendChild(d);setTimeout(()=>d.remove(),3000);}}catch(e){}}
+const showToast=(msg,isSuccess=false)=>{const t=qs('#toast');if(!t)return;t.textContent=msg;t.className=isSuccess?'toast success-toast':'toast';t.style.display='block';t.style.animation='none';setTimeout(()=>{t.style.animation=''},10);if(isSuccess){playSuccessSound();createConfetti();}setTimeout(()=>{t.style.display='none'},3000);};
+
+function showLoading(m='جاري تحميل البيانات...'){const ov=qs('#loadingOverlay');ov.querySelector('.loading-spinner div:last-child').textContent=m;ov.style.display='flex';document.body.classList.add('loading');}
+function hideLoading(){qs('#loadingOverlay').style.display='none';document.body.classList.remove('loading')}
+
+// ====== مقارنة وإحصاءات ======
+const pct = (num,den)=> den>0? Math.round((num/den)*100):0;
+function setCircle(el, percent){ el.style.setProperty('--p', percent); }
+
+function updateComparison(data){
+  const card=qs('#comparisonCard');
+  if(!(data.morning && data.emergency)){ card.style.display='none'; return; }
+
+  const m = data.morning, e = data.emergency;
+  const mPres = (m.total||0) - (m.absent||0);
+  const ePres = (e.total||0) - (e.absent||0);
+
+  const mAbsRate = pct(m.absent, m.total), eAbsRate = pct(e.absent, e.total);
+  const mPresRate = pct(mPres, m.total),   ePresRate = pct(ePres, e.total);
+
+  qs('#kpi-mor-abs').textContent = `${m.absent||0} غائب`;
+  qs('#kpi-mor-pres').textContent = `${mPres} حاضر`;
+  qs('#kpi-mor-total').textContent = `${m.total||0} إجمالي`;
+  setCircle(qs('#circle-mor-abs'), mAbsRate); qs('#circle-mor-abs-txt').textContent = mAbsRate+'%';
+  setCircle(qs('#circle-mor-pres'), mPresRate); qs('#circle-mor-pres-txt').textContent = mPresRate+'%';
+
+  qs('#kpi-em-abs').textContent = `${e.absent||0} غائب`;
+  qs('#kpi-em-pres').textContent = `${ePres} حاضر`;
+  qs('#kpi-em-total').textContent = `${e.total||0} إجمالي`;
+  setCircle(qs('#circle-em-abs'), eAbsRate); qs('#circle-em-abs-txt').textContent = eAbsRate+'%';
+  setCircle(qs('#circle-em-pres'), ePresRate); qs('#circle-em-pres-txt').textContent = ePresRate+'%';
+
+  const diffAbs = (m.absent||0) - (e.absent||0);
+  const diffRate = mAbsRate - eAbsRate;
+  const diffPresRate = mPresRate - ePresRate;
+  qs('#kpi-diff-abs').textContent = (diffAbs>0? '+'+diffAbs : diffAbs);
+  qs('#kpi-diff-rate').textContent = (diffRate>0? '+'+diffRate : diffRate) + '%';
+  qs('#kpi-diff-presRate').textContent = (diffPresRate>0? '+'+diffPresRate : diffPresRate) + '%';
+  const statusEl=qs('#differenceStatus');
+  if(diffAbs>0){ statusEl.textContent='زيادة غياب بالحصة الأولى'; statusEl.className='badge red'; }
+  else if(diffAbs<0){ statusEl.textContent='زيادة غياب بالحالة الطارئة'; statusEl.className='badge red'; }
+  else { statusEl.textContent='متماثل'; statusEl.className='badge gray'; }
+
+  card.style.display='block';
+}
+
+function updateBadge(data){
+  if(!data) return;
+  const cur=data.current||data;
+  const t=cur.total??0, a=cur.absent??0, p=cur.present??(t-a);
+  qs('#statsBadge').textContent=`${data.mode||'-'} | الإجمالي: ${t} | غائب: ${a} | حاضر: ${p}`;
+  updateComparison(data);
+  if(data.statuses) renderStatuses(data.statuses);
+}
+
+// ====== متابعة الصفوف ======
+function renderStatuses(statuses){
+  const box=qs('#statusList'); box.innerHTML='';
+  (statuses||[]).forEach(st=>{
+    const pill=document.createElement('div');
+    pill.className='pill'+(st.taken?' taken':'');
+    pill.innerHTML=(st.taken?'✅ ':'⏳ ')+`<span>${st.grade}</span>`;
+    pill.title=st.taken?'تم تسجيل الغياب لهذا الصف':'لم يتم التسجيل بعد';
+    pill.addEventListener('click',()=> onGradeSelected(st.grade));
+    box.appendChild(pill);
+  });
+}
+
+async function onGradeSelected(grade){
+  if (BUSY) return;
+  BUSY = true;
+
+  CURRENT_GRADE=grade;
+  const actions=qs('#gradeActions'); if(actions){actions.style.display= grade? 'flex':'none'}
+
+  const list=qs('#list'), empty=qs('#empty');
+  list.style.display='none'; list.innerHTML='';
+  empty.style.display='block'; empty.textContent='جاري تحميل الطلاب...'; empty.className='empty-state';
+
+  if(!grade){ empty.textContent='اختر الصف لتحميل الأسماء...'; BUSY=false; return; }
+
+  showLoading('جاري تحميل بيانات الصف...');
+  const res = await apiCall('getGradeBundle',{ grade });
+  if(!res || res.error){
+    showToast('❌ خطأ في التحميل: ' + (res && res.error || 'غير معروف'));
+    hideLoading(); BUSY=false; return;
+  }
+
+  updateBadge(res);
+  CURRENT_LIST = res.students || [];
+  SELECTED_ROWS.clear();
+  renderList();
+  updateSelectionCount();
+  hideLoading();
+  BUSY = false;
+}
+
+function renderList(){
+  const list=qs('#list'), empty=qs('#empty');
+  list.innerHTML='';
+  if(!CURRENT_LIST.length){
+    list.style.display='none';
+    empty.style.display='block';
+    empty.textContent='لا توجد نتائج';
+    empty.className='empty-state';
+    return;
+  }
+  empty.style.display='none';
+  list.style.display='block';
+
+  CURRENT_LIST.forEach(st=>{
+    const item=document.createElement('div'); item.className='item';
+    const checkbox=document.createElement('input'); checkbox.type='checkbox';
+    checkbox.checked=SELECTED_ROWS.has(st.row);
+    checkbox.addEventListener('change',()=>{ if(checkbox.checked){SELECTED_ROWS.add(st.row)} else {SELECTED_ROWS.delete(st.row)}; updateSelectionCount(); });
+    const info=document.createElement('div'); info.style.flex='1';
+    const name=document.createElement('div'); name.className='name'; name.textContent=st.name;
+    const meta=document.createElement('div'); meta.className='meta'; meta.textContent=`الصف: ${st.grade} - الرقم: ${st.id}`;
+    info.appendChild(name); info.appendChild(meta);
+    const tag=document.createElement('span'); tag.className='tag';
+    tag.textContent=st.state==='غائب'?'غائب':'حاضر';
+    tag.style.background=st.state==='غائب'?'#fee2e2':'#d1fae5';
+    tag.style.color=st.state==='غائب'?'#991b1b':'#065f46';
+    tag.style.borderColor=st.state==='غائب'?'#fecaca':'#a7f3d0';
+    item.appendChild(checkbox); item.appendChild(info); item.appendChild(tag);
+    list.appendChild(item);
+  });
+  updateSelectionCount();
+}
+
+function updateSelectionCount(){
+  const save=qs('#saveBulkBtn');
+  if(!save) return;
+  const count=SELECTED_ROWS.size;
+  const total=CURRENT_LIST.length||0;
+  if(count>0){ save.textContent = `💾 حفظ (${count} غائب من ${total})`; }
+  else{ save.textContent = `💾 حفظ (الكل حاضر — ${total} طالب)`; }
+}
+
+// ====== حفظ ======
+async function saveBulk(){
+  const grade=CURRENT_GRADE; if(!grade){showToast('❌ اختر صفًا أولاً');return;}
+  showLoading('جاري تسجيل الغياب...');
+  const absentRows=[...SELECTED_ROWS];
+  const res = await apiCall('smartMarkGrade',{ grade, absentRows });
+  if(res?.ok){
+    const msg= absentRows.length>0? `✅ تم التسجيل: ${res.presentCount||0} حاضر, ${res.absentCount||0} غائب`
+                                  : `✅ تم تسجيل حضور للصف كاملاً (${res.presentCount||0} طالب)`;
+    showToast(msg,true);
+    updateBadge(res);
+    const list=qs('#list'), empty=qs('#empty');
+    list.style.display='none'; list.innerHTML='';
+    empty.style.display='block'; empty.textContent='✅ تم الحفظ بنجاح! اختر صفًا آخر'; empty.className='empty-state success';
+    SELECTED_ROWS.clear(); CURRENT_LIST=[];
+  }else{
+    showToast('❌ حدث خطأ في الحفظ: '+(res?.message||res?.error||'غير معروف'));
+  }
+  hideLoading();
+}
+
+// ====== عرض الغياب + تنزيل PDF ======
+async function showAbsentsAll(){
+  showLoading('جاري تحميل قائمة الغائبين...');
+  const res = await apiCall('listAbsentsAll',{});
+  const box=qs('#absentsBox'); const content=qs('#absContent');
+  content.innerHTML='';
+  const total=res?.total??0; qs('#absCount').textContent=total;
+  if(total===0){content.textContent='لا يوجد غياب في جميع الصفوف.'; box.style.display='block'; hideLoading(); return;}
+  (res?.byGrade||[]).forEach(g=>{
+    const h=document.createElement('div'); h.style.fontWeight='700'; h.style.marginTop='12px'; h.textContent=`${g.grade} — (${g.count})`;
+    content.appendChild(h);
+    const ul=document.createElement('ul'); ul.style.paddingRight='20px'; ul.style.marginTop='6px';
+    g.names.forEach(s=>{ const li=document.createElement('li'); li.textContent=`${s.name} — رقم: ${s.id||'-'}`; li.style.marginBottom='4px'; ul.appendChild(li); });
+    content.appendChild(ul);
+  });
+  box.style.display='block'; hideLoading();
+}
+
+async function exportAbsentsPdf(){
+  showLoading('جاري توليد ملف PDF...');
+  const res = await apiCall('absentsPdf',{});
+  hideLoading();
+  if (!res || !res.ok || !res.base64) {
+    showToast('❌ تعذر توليد PDF: ' + (res && res.error || 'غير معروف'));
+    return;
+  }
+  const byteChars = atob(res.base64);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+  const blob = new Blob([new Uint8Array(byteNumbers)], { type: res.mime || 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = res.filename || `absents-${new Date().toISOString().slice(0,10)}.pdf`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('📄 تم تنزيل ملف الغياب PDF', true);
+}
+
+// ====== الرمز السري ======
+function openPasswordModal(){const m=qs('#passwordModal');const i=qs('#passwordInput');if(m&&i){m.style.display='flex';i.value='';i.focus();}}
+function closePasswordModal(){const m=qs('#passwordModal'); if(m){m.style.display='none';}}
+async function confirmClearMarks(){
+  const password=qs('#passwordInput').value;
+  if(!password){showToast('❌ الرجاء إدخال الرمز السري');return;}
+  showLoading('جاري التحقق من الرمز...');
+  const check = await apiCall('verifyPassword',{ password });
+  if(check?.ok){
+    const res = await apiCall('clearAllMarks',{ password });
+    if(res?.ok){
+      updateBadge(res);
+      const list=qs('#list'), empty=qs('#empty');
+      list.style.display='none'; list.innerHTML='';
+      empty.style.display='block'; empty.textContent='اختر الصف لتحميل الأسماء...'; empty.className='empty-state';
+      qs('#gradeActions').style.display='none';
+      SELECTED_ROWS.clear(); CURRENT_LIST=[];
+      hideLoading(); closePasswordModal(); showToast('✅ تم مسح جميع الوسوم بنجاح',true);
+    }else{
+      hideLoading(); showToast('❌ '+(res?.message||res?.error||'فشل غير معروف'));
+    }
+  }else{
+    hideLoading(); showToast('❌ الرمز السري غير صحيح');
+  }
+}
+
+// ====== تهيئة ======
+document.addEventListener('DOMContentLoaded', async ()=>{
+  showLoading('جاري تحميل التطبيق...');
+  const data = await apiCall('getInitial',{});
+  if (!data || data.ok === false || data.error) {
+    hideLoading();
+    console.error('getInitial error:', data && data.error);
+    document.querySelector('#empty').textContent = 'تعذر الاتصال بالمخدّم. تحقق من رابط الـAPI أو الصلاحيات.';
+    showToast('❌ تعذر الاتصال بالـAPI: ' + (data && data.error ? data.error : 'Unknown error'));
+    return;
+  }
+  qs('#mode').value=data?.mode||'الحصة الأولى';
+  renderStatuses(data?.statuses||[]);
+  updateBadge(data);
+  hideLoading();
+});
+
+// أحداث
+qs('#mode').addEventListener('change', async e=>{
+  showLoading('جاري تغيير وضع الرصد...');
+  const res = await apiCall('setMode',{ mode:e.target.value });
+  if(!res || res.error){ showToast('❌ حدث خطأ في تغيير الوضع'); hideLoading(); return; }
+  updateBadge(res);
+  if(CURRENT_GRADE){ await onGradeSelected(CURRENT_GRADE); }
+  hideLoading();
+});
+qs('#saveBulkBtn').addEventListener('click', saveBulk);
+qs('#showAbsentsBtn').addEventListener('click', showAbsentsAll);
+qs('#showAbsentsBtnFooter').addEventListener('click', showAbsentsAll);
+qs('#exportPdfBtn').addEventListener('click', exportAbsentsPdf);
+qs('#clearMarksBtn').addEventListener('click', openPasswordModal);
+document.addEventListener('keypress', e=>{ if(e.key==='Enter' && qs('#passwordModal').style.display==='flex'){ confirmClearMarks(); }});
+</script>
+</body>
+</html>
+
+
